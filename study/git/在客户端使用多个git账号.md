@@ -62,5 +62,15 @@ PreferredAuthentications publickey：这是认证方式的首选项，指定了 
 Hi xatulc! You've successfully authenticated, but GitHub does not provide shell access.
 
 最后在不同的本地仓库记得使用命令设置当前的用户，不然就是全局的默认用户
-git config --local user.name xxx
-git config --local user.email xxx@xxx.com
+git config --local user.name xatulc
+git config --local user.email xatu_lc@163.com
+
+
+
+echo "# galaxy" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin git@github.com:xatulc/galaxy.git
+git push -u origin main
