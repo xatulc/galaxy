@@ -1,7 +1,7 @@
 <!--封面-->
 
 <center>  
-  <img src="_media/head.jpg" style="width:200px; height:200px; border-radius:50%; opacity:0.8;"/>  
+  <img src="_media/boat.jpeg" style="width:200px; height:200px; border-radius:50%; opacity:0.8;"/>  
 </center> 
 
 

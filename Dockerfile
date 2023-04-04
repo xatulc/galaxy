@@ -1,5 +1,5 @@
 #使用 docsify-cli 镜像作为基础镜像
-FROM node:18-buster-slim
+FROM node:16.18-buster-slim
 
 RUN npm i docsify-cli -g
 
