@@ -1,33 +1,38 @@
-ssh 密钥存位置
+mac上 ssh密钥的存位置
 ```shell
-~/.ssh
+cd ~/.ssh
 ```
-
 查看git全局配置
 ```
 git config --global
 ```
 实质是查询 ~/.gitconfig 文件
 
-生成密钥对的命令
+### 1. 生成密钥对的命令
 ```shell
 ssh-keygen -t rsa -C "new email"
 ```
-平时我们都是直接回车，默认生成id_rsa和id_rsa.pub。这里特别需要注意，出现提示输入文件名的时候(Enter file in which to save the key (~/.ssh/id_rsa): id_rsa_new)要输入与默认配置不一样的文件名，比如：我这里填的是 id_rsa_github
+如果只使用一个git账号我们都是直接回车，默认生成id_rsa和id_rsa.pub。
+这里特别需要注意，出现提示输入文件名的时候(Enter file in which to save the key (~/.ssh/id_rsa): id_rsa_new)要输入与默认配置不一样的文件名，比如：我这里填的是 id_rsa_github
 
-生成了如下的密钥对
+### 2. 查看生成的密钥对
 ```
-config				id_rsa_github			id_rsa_xatu_lc@163.com.pub
-id_rsa				id_rsa_github.pub		known_hosts
-id_rsa.pub			id_rsa_xatu_lc@163.com		known_hosts.old
+config				id_rsa_github			
+id_rsa				id_rsa_github.pub
+id_rsa.pub		    known_hosts
 ```
 
- 执行ssh-agent让ssh识别新的私钥
+### 3. 执行ssh-agent让ssh识别新的私钥
+
+```shell
 ssh-add ~/.ssh/id_rsa_github
+```
 
-创建一个config文件
+### 4. 写一个config配置文件
+```shell
 touch config
-
+```
+内容：
 ```
 # 配置xatu_lc@163.com
 Host my_coding
@@ -45,32 +50,43 @@ PreferredAuthentications publickey
 ```
 
 拿配置gitHub的例子来解释下：
-
+```shell
 Host github：这是一个自定义的别名，表示你要连接的远程主机
+
 HostName github.com：这是 GitHub 的真实域名，在 SSH 连接时会将该域名解析为相应的 IP 地址。
+
 User xatulc：这是你在 GitHub 上的用户名，也就是你的身份标识。
+
 IdentityFile ~/.ssh/id_rsa_github：这是 SSH 密钥文件的路径，其中 id_rsa_github 是一个针对 GitHub 的密钥文件名。使用密钥可以增加 SSH 连接的安全性。
+
 PreferredAuthentications publickey：这是认证方式的首选项，指定了 SSH 连接时优先采用公钥认证方式。
+```
 
-原来使用默认（全部用户）使用该命令：  git@github.com:xatulc/galaxy.git
-现在就要使用 github:xatulc/galaxy.git
+### 5. 将对应的公钥复制到github上
 
+选择Settings然后选择SSH填入公钥
 
-将对应的公钥复制到github上
- 
-使用 ssh -T git@github.com 进行测试 (命令是：ssh -T git@HostName)输出：
+![](images/1.png ':size=500x500')
+
+![](images/2.png ':size=500x500')
+
+### 6. 进行测试
+```shell
+# ssh -T git@HostName
+ssh -T git@github.com
+```
+输出为下：
+```shell
 Hi xatulc! You've successfully authenticated, but GitHub does not provide shell access.
+```
+### 7. 如何使用&需要注意
 
-最后在不同的本地仓库记得使用命令设置当前的用户，不然就是全局的默认用户
+最后在不同的本地仓库记得使用命令设置当前的用户，不然就是使用的全局的默认用户
+
+使用那个用户既得在当前本地仓库进行初始化
+```shell
 git config --local user.name xatulc
 git config --local user.email xatu_lc@163.com
+```
 
-
-
-echo "# galaxy" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin git@github.com:xatulc/galaxy.git
-git push -u origin main
+**另外的密钥也参照上述步骤进行**
