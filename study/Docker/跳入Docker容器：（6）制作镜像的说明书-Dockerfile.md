@@ -9,6 +9,13 @@ docker build -t name:v1 .
 ```
 dokcer build -t name:v1 -f nginx.Dokcerfile .
 ```
+
+```text
+-t 选项用于指定镜像的名称，这里是 test:v2。-t 选项后面的值指定了镜像的名称，而 :v2 指定了版本号，这里使用的是 v2 版本。
+-f 选项用于指定 Dockerfile 文件的路径。这里的 test.Dockerfile 是待构建镜像的 Dockerfile 文件的路径。
+. 选项用于指定 Dockerfile 文件所在的行号范围，用于指定 Dockerfile 中 FROM 命令之前的行数。这个范围默认是 1 到 100。
+```
+
 ### 6.2 Dockerfile是什么
 Dockerfile 是一个文本文件，它包含了构建 Docker 镜像的指令和参数。通过在 Dockerfile 文件中定义每一层所需的操作和步骤。
 
