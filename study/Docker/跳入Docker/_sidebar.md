@@ -1,6 +1,6 @@
 * **目录**
-  * [根目录（/）](/README)
-  * [回到上一级（../）](README.md)
+  * [根目录](/README)
+  * [回到上一级](/study/Docker/README.md)
   * [跳入Docker容器：（1）介绍](/study/Docker/跳入Docker/跳入Docker容器：（1）介绍.md)
   * [跳入Docker容器：（2）镜像](/study/Docker/跳入Docker/跳入Docker容器：（2）镜像.md)
   * [跳入Docker容器：（3）容器](/study/Docker/跳入Docker/跳入Docker容器：（3）容器.md)
