@@ -31,7 +31,7 @@ docker ps -a
 # 启动停止的容器
 docker start mysql
 ```
-#### 3.1.3 启动mysql容器的命令
+#### 3.1.3 启动mysql（各种资源限制）
 ```shell
  docker run -p 3306:3306 --name mysql -d -m 128m -c 512 -e MYSQL_ROOT_PASSWORD=onPrem --restart=always -v /opt/mysql/mss-light-mysql/my.cnf:/etc/mysql/my.cnf -v /opt/mysql/mss-light-mysql/data:/var/lib/mysql mysql:5.7.25
 ```
@@ -75,13 +75,56 @@ docker cp -r /hostdir webserver:/containerdir
 ```
 docker cp mycontainer:/path/to/folder /home/user
 ```
-### 3.5 容器内安装命令
+
+### 3.5 查看日志
+```text
+docker logs 容器名/容器id
+```
+
+查看更具体的使用方法：
+```shell
+docker logs --help
+```
+
+#### 3.5.1 显示某个容器的后100行的日志
+```shell
+docker logs -n 100 --follow redis-test
+```
+
+### 3.6 运行中的容器做资源限制
+```shell
+docker stop containerId
+docker update containerId -m 256m  --memory-swap -1
+docker start containerId
+```
+解释：
+```text
+--memory  或  -m  限制容器的内存使用量（如10m,200m等）
+
+--memory-swap # 限制内存和 Swap 的总和，不设置的话默认为--memory的两倍
+
+如果 --memory-swap 和 --memory 设置了相同值，则表示不使用 Swap
+
+如果 --memory-swap 设置为 -1 则表示取消对交换空间的限制，这意味着容器可以使用无限量的交换空间，这可能会导致系统性能问题。
+
+如果设置了 --memory-swap 参数，则必须设置 --memory 参数
+
+update --memory 时数值不能超过 --memory-swap 的值，否则会报错 Memory limit should be smaller than already set memoryswap limit
+```
+
+查看是否生效
+
+```text
+docker inspect containerId
+```
+
+### 3.7 容器内安装命令
 ```
 apt-get update
 apt-get install inetutils-ping 
 ```
 
-### 3.6 删除容器
+### 3.8 删除容器
 ```
 docker rm 容器名/容器id
 ```

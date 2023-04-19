@@ -55,20 +55,37 @@ docker image rm $(docker image ls -q redis)
 ```
 docker rmi $(docker image ls | grep hello）
 ```
-### 2.4 导入导出镜像
-#### 2.4.1 导出镜像为tar
+
+### 2.4 清理docker镜像
+```shell
+docker image prune 
+```
+
+```shell
+docker image prune -a
+```
+
+docker image prune 命令只会删除那些没有被任何容器引用的镜像，而不会删除 dangling 镜像（即未被标记的镜像）。
+
+docker image prune -a 命令将会删除所有没有容器引用的镜像，以及所有 dangling 镜像。
+
+它们都会永久性地删除镜像。
+
+
+### 2.5 导入导出镜像
+#### 2.5.1 导出镜像为tar
 ```
 docker save -o ubuntu_14.04.tar ubuntu:14.04
 ```
-#### 2.4.2 tar包恢复为镜像
+#### 2.5.2 tar包恢复为镜像
 ```
 docker load -i ubuntu_14.04.tar
 ```
-#### 2.4.3 镜像打tar.gz
+#### 2.5.3 镜像打tar.gz
 ```
 docker save <image>:<tag> | gzip > 压缩包名称.tar.gz
 ```
-#### 2.4.4 tar.gz恢复为镜像
+#### 2.5.4 tar.gz恢复为镜像
 ```
 gunzip -c 压缩包名称.tar.gz.tar.gz | docker load
 ```
