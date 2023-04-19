@@ -90,3 +90,35 @@ git config --local user.email xatu_lc@163.com
 ```
 
 **另外的密钥也参照上述步骤进行**
+
+### 8. 过段时间后使用 ssh -T git@github.com 没有权限
+```text
+git@github.com: Permission denied (publickey). 
+```
+1. 对比github的sha256和本地的sha256发现一样
+```shell
+# SSH 公钥文件的sha256
+ssh-keygen -lf id_rsa_github.pub
+```
+2. 解决
+```shell
+# 确保您的ssh-agent正在运行：
+eval "$(ssh-agent -s)"
+# 将您的SSH密钥添加到ssh-agent中：
+ssh-add ~/.ssh/id_rsa_github
+```
+
+如果想让其永久生效，将其加到终端的配置文件
+```shell
+vim ~/.zshrc
+```
+在文件~/.zshrc 最后面加入如下：
+```shell
+# 解决git@github.com: Permission denied (publickey).
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa_github > /dev/null 2>&1
+```
+让~/.zshrc生效
+```shell
+source ~/.zshrc
+```
