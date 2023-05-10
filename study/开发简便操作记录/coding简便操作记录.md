@@ -170,5 +170,6 @@ public interface ProductMapper extends BaseMapper<Product> {
 * 复制 Command+C，剪切 Command+X，粘贴 Command+V
 * 撤销 Command-Z, 全选 Command-A（All,）查找（Find）Command-F
 
-### ChatGPT插件
+### ChatGPT插件-Bito
+https://docs.bito.ai/
 https://blog.csdn.net/weixin_44727080/article/details/130365108
