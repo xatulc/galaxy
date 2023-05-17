@@ -173,3 +173,22 @@ public interface ProductMapper extends BaseMapper<Product> {
 ### ChatGPT插件-Bito
 https://docs.bito.ai/
 https://blog.csdn.net/weixin_44727080/article/details/130365108
+
+
+## Linux相关
+### 启动jar时 & 和 2>&1 作用
+java -jar & 命令只是将Java应用程序放在后台运行，而不会输出任何信息到终端；
+java -jar 2>&1 命令会将应用程序的输出信息都打印到终端上，包括日志和错误信息。
+
+### 获取pod中环境变量传递给jvm环境变量
+java -DMY_POD_NAME=${MY_POD_NAME} -jar xxx.jar
+或
+-DMY_POD_NAME=$(env | grep MY_POD_NAME)
+
+### 查看JVM GC和内存情况
+```shell
+# 启动jar同时启动jvm监控命令
+java -jar xxxx.jar & 
+jstat -gc `pgrep -f app.jar` 1000 > jst.log &
+```
+
