@@ -192,3 +192,11 @@ java -jar xxxx.jar &
 jstat -gc `pgrep -f app.jar` 1000 > jst.log &
 ```
 
+### vim以16进制查看文件
+```text
+# vim后输入 转化为16进制
+:%!xxd
+# vim后输入 退出十六进制视图
+:%!xxd -r
+```
+
