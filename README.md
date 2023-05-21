@@ -7,7 +7,7 @@ docsify serve galaxy --port 13000
 ```
 
 Dockerfile 运行命令：
-```Dockerfile
+```shell
 docker build -t docs:v1 . 
 ```
 
