@@ -169,11 +169,19 @@ public interface ProductMapper extends BaseMapper<Product> {
 * 代码自动补全：Command + option + V
 * 复制 Command+C，剪切 Command+X，粘贴 Command+V
 * 撤销 Command-Z, 全选 Command-A（All,）查找（Find）Command-F
+* 重写抽象类的某个方法可以使用快捷键 Ctrl+O
+* 查看类的所有方法 alt + 7
+* 查看类的子类或者接口的实现类 Ctrl + H
 
 ### ChatGPT插件-Bito
 https://docs.bito.ai/
 https://blog.csdn.net/weixin_44727080/article/details/130365108
 
+### 访达左边的项目消失
+```shell
+rm ~/Library/Preferences/com.apple.finder.plist
+killall Finder
+```
 
 ## Linux相关
 ### 启动jar时 & 和 2>&1 作用
