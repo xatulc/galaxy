@@ -420,7 +420,7 @@ truncate是DDL语句操作，delete是DML语句操作。
 
 ### 事务隔离级别
 MySql InnoDB存储引擎实现SQL标准的4种隔离级别。
-低级别的隔离级一般支持更高的并发处理，并拥有更低的系统开销。MySql数据库通过 SHOW VARIABLES LIKE 'transaction_isolation'; 来查看当前数据库的隔离级别
+低级别的隔离级一般支持更高的并发处理，并拥有更低的系统开销。MySql数据库通过 SELECT @@tx_isolation;命令来查看，MySQL 8.0 该命令改为SELECT @@transaction_isolation; 来查看当前数据库的隔离级别
 ```text
 +-----------------------+-----------------+
 | Variable_name         | Value           |
@@ -437,6 +437,19 @@ MySql默认的隔离级别是 REPEATABLE-READ
 在其中一个事务中，直到事务结束前，都可以读取到事务刚开始看到的数据，并一直不会发生变化，避免了脏读、不可重复读、幻读的发生
 #### 串行
 在每个读的数据行上都需要加表级共享锁，在每次写数据时都要加表级排他锁，并发能力严重下降
+
+### 脏读、不可重复读、幻读、可重复读
+#### 脏读
+脏读是在事务隔离级别 读未提交 中出现的问题。一个事务读取到另一个正在进行中的事务提交的数据
+
+#### 不可以重复读和幻读
+不可重复读指在其中一个事务中，读取到其他事务对旧数据的修改完毕的记录（常见的update和delete语句）
+
+幻读指在一个事务中，读取到其他事务新增的数据，仿佛出现了幻影（常见insert语句）
+
+#### 可重复读
+在标准的 SQL 隔离级别定义里，可重复读是不可以防止幻读的。但是！InnoDB 实现的 REPEATABLE-READ 隔离级别其实是可以解决幻读问题发生的。
+
 
 
 
@@ -490,7 +503,18 @@ delete from table name(where)或者truncatetable table name
 ```text
 insert into table name(字段列表)values(对应字段的值)
 ```
-
+```text
+INSERT INTO students
+VALUES (0, 'a', 0),
+       (5, 'b', 5),
+       (10, 'c', 10);
+```
+```text
+insert into students (id,name,age) values
+(0, 'a', 0),
+(5, 'b', 5)
+(25, 'f', 25);
+```
 ### 更新表中某行数据
 ```text
 update table_name set:字段名=某值(where)
@@ -509,6 +533,9 @@ desc table name
 ### 获取表基础信息
 ```text
 show table status
+```
+```text
+SHOW TABLE STATUS LIKE '表名' \G
 ```
 
 ### 查看当前表下索引的情况
