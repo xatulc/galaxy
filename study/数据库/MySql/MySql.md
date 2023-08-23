@@ -1,3 +1,5 @@
+主要对《MySql王者晋级之路》和 《JavaGuide》MySql模块对学习总结和自己的理解
+
 ## Mysql主流版本和分支
 * Oracle官方的MySQL
 * Percona Server
@@ -371,22 +373,6 @@ DB_ROLL_PTR：是一个指向回滚段中回滚记录的指针，用于支持事
 redo log 用于记录事务操作变化，记录的是数据被修改之后的值。
 
 undo log对记录做变更操作时不仅会产生redo记录，也会产生undo记录（insert、update、delete）但是undo只记录变更前的旧数据。undo默认记录在系统表空间（ibdata1），MySql5.6后也可以使用独立的undo表空间。
-
-
-## 索引
-### B+tree
-B+tree是由二叉树->平衡二叉树->B-tree演化而来的
-
-二叉树,平衡二叉树可以查看 [数据结构-算法-二叉树中定义]  
-
-平衡二叉树在插入后整个树依然是平衡的，它会通过左旋和右旋来使不平衡的树变为平衡树。
-
-![](images/平衡二叉树左旋-右旋.png ":size=200x200")
-
-
-
-
-
 
 ## 事务
 ### 事务的特性
