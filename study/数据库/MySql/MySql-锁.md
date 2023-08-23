@@ -6,7 +6,7 @@
 官方自带的逻辑备份工具是mysqldump。 当mysqldump使用参数–single-transaction的时候，导数据之前就会启动一个事务，来确保拿到一致性视图。 而由于MVCC的支持，这个过程中数据是可以正常更新的。
 
 ## InnoDB的锁类型
-* 共享锁（读锁-s锁）/排他锁（写锁-锁）
+* 共享锁（读锁-s锁）/排他锁（写锁-x锁）
 * 意向锁
 * MDL锁
 
@@ -16,7 +16,7 @@
 一个事务获取了一个数据行的读锁后，其他事务也可以获取该行的读锁。但是不能获取写锁（增删改）
 
 读锁有两种select的应用：
-* 自动提交模式下的select语句，不需要加任何锁，直接赶回查询结果，这是一致性非锁定读
+* 自动提交模式下的select语句，不需要加任何锁，直接返回查询结果，这是一致性非锁定读
 * 通过 select...lock in share mode 在被读取的行记录或行记录范围加一个读锁
 
 ### 写锁
@@ -32,7 +32,7 @@
 **单独的语句会默认开启一个事务并进行自动提交，多个语句以原子操作方式执行，需要显式地开启事务，并手动提交或回滚事务。**
 
 ### MDL锁
-MySql5。5引入了meta data lock，简称MDL锁，用于管理对象的元数据访问，保证表中的元数据信息。也可以理解为表级别的锁
+MySql5.5引入了meta data lock，简称MDL锁，用于管理对象的元数据访问，保证表中的元数据信息。也可以理解为表级别的锁
 
 在会话A中，开启事务后，会自动获取一个MDL锁，会话B就不能再执行任何DDL语句的操作。（DDL语句主要用于定义数据库的结构和组织方式）
 因此因此，事务B中执行 DDL 语句会被阻塞，直到当前事务A提交或回滚才能继续执行。
@@ -56,16 +56,15 @@ InnoDB默认的事务隔离级别为 可重复读。行锁的种类有：
 普通索引默认的是next-key
 
 ### 记录锁
-也被称为记录锁，属于单个行记录上的锁。
+属于单个行记录上的锁。
 
 ### 间隙锁
 锁定一个范围，不包括记录本身。
 
-* 临键锁
+### 临键锁
 Record Lock+Gap Lock，锁定一个范围，包含记录本身，主要目的是为了解决幻读问题。记录锁只能锁住已经存在的记录，为了避免插入新记录，需要依赖间隙锁。
 
-
-### 锁总结
+## 锁总结
 * MySql中锁主要分为三类：全局锁、表级锁、行锁。
 
 * 表级锁有 意向锁 和 MDL锁；想要获取对应的行锁就要先获取到对应的意向锁 IS-S/IX-X；在事务开启后就会获取到MDL锁，防止其他事务进行DDL语句更改表的结构；意向锁和MDL锁都是为了进行事务中，防止其他事务执行DDL语句，改变表结构或数据。
@@ -84,17 +83,7 @@ Record Lock+Gap Lock，锁定一个范围，包含记录本身，主要目的是
     可以这样理解：记录锁-共享锁，记录锁-排他锁
 ```
 
-
-
-
-
-
-
-
-
-
-
-
+## next-key lock 加锁范围探究
 
 ### 创建一个表并插入语句
 ```text
@@ -131,7 +120,7 @@ mysql> select * from students;
 +----+------+------+
 ```
 
-### 开始一个事务
+### 主键等值查询-数据存在
 ```
 mysql> begin;
 Query OK, 0 rows affected (0.00 sec)
@@ -198,13 +187,157 @@ OBJECT_INSTANCE_BEGIN : 表示锁定对象实例的起始位置
 LOCK_TYPE : 表示锁的类型（允许的值为 RECORD 行级锁 和 TABLE 表级锁）
 LOCK_MODE : 表示锁的模式 (S, X, IS, IX, and gap locks（【行锁：record 记录锁，gap 间隙锁，Next-key 临键锁】【表锁&行锁：共享锁(S锁)，排他锁（X锁）】【表锁：意向共享锁（IS锁），意向排他锁（IX锁）】）)
 LOCK_STATUS : 表示锁的状态
-LOCK_DATA : 表示锁的具体数据
+LOCK_DATA : 表示锁的数据；对于InnoDB，当LOCK_TYPE是RECORD（行锁）的，则显示值。当锁在主键索引时，则值锁定的是主键值。当锁是在辅助索引上是，则显示辅助索引值，并附加主键值。
 ```
 查询到的结果解释： 
 ```text
 第一行数据是事务中加了一个表锁（IX）意向排他锁；意味着当前线程获取到了IX锁，其他线线程会阻塞着等待IX锁释放。
 
-第二行是一个行锁 X,REC_NOT_GAP 
+第二行是一个行锁 X,REC_NOT_GAP ，select * from students where id =15 for update;锁住了第15行数据  记录锁-写锁
 ```
 
+### 主键等值查询-数据不存在
+```text
+mysql> begin;select * from students where id = 16 for update;
+```
+```text
+mysql> select * from performance_schema.data_locks\G
+*************************** 2. row ***************************
+               ENGINE: INNODB
+       ENGINE_LOCK_ID: 281472482111488:4:4:6:281472493740112
+ENGINE_TRANSACTION_ID: 1879
+            THREAD_ID: 48
+             EVENT_ID: 85
+        OBJECT_SCHEMA: test
+          OBJECT_NAME: students
+       PARTITION_NAME: NULL
+    SUBPARTITION_NAME: NULL
+           INDEX_NAME: PRIMARY
+OBJECT_INSTANCE_BEGIN: 281472493740112
+            LOCK_TYPE: RECORD
+            LOCK_MODE: X,GAP
+          LOCK_STATUS: GRANTED
+            LOCK_DATA: 20
+2 rows in set (0.01 sec)
+```
+可以看到 主键等值查询，查询id=16时，是LOCK_TYPE: RECORD；LOCK_MODE: X,GAP；LOCK_DATA: 20；
 
+等值主键查询，数据不存在；为间隙锁，且锁的区间为（15，20）；间隙锁是由于next-key lock退化而来，next-key lock区间为前开后闭(15,20],退化后为间隙锁就为（15，20）
+
+### 范围查询1
+```text
+mysql> begin; select * from students where id >= 10 and id < 11 for update;
+```
+```text
+mysql>  select * from performance_schema.data_locks\G
+*************************** 2. row ***************************
+               ENGINE: INNODB
+       ENGINE_LOCK_ID: 281472482111488:4:4:4:281472493740112
+ENGINE_TRANSACTION_ID: 1881
+            THREAD_ID: 48
+             EVENT_ID: 95
+        OBJECT_SCHEMA: test
+          OBJECT_NAME: students
+       PARTITION_NAME: NULL
+    SUBPARTITION_NAME: NULL
+           INDEX_NAME: PRIMARY
+OBJECT_INSTANCE_BEGIN: 281472493740112
+            LOCK_TYPE: RECORD
+            LOCK_MODE: X,REC_NOT_GAP
+          LOCK_STATUS: GRANTED
+            LOCK_DATA: 10
+*************************** 3. row ***************************
+               ENGINE: INNODB
+       ENGINE_LOCK_ID: 281472482111488:4:4:5:281472493740456
+ENGINE_TRANSACTION_ID: 1881
+            THREAD_ID: 48
+             EVENT_ID: 95
+        OBJECT_SCHEMA: test
+          OBJECT_NAME: students
+       PARTITION_NAME: NULL
+    SUBPARTITION_NAME: NULL
+           INDEX_NAME: PRIMARY
+OBJECT_INSTANCE_BEGIN: 281472493740456
+            LOCK_TYPE: RECORD
+            LOCK_MODE: X,GAP
+          LOCK_STATUS: GRANTED
+            LOCK_DATA: 15
+3 rows in set (0.00 sec)
+```
+```text
+通过sql可以分析到 id>=10 --> （10，+∞） -->  [10，+∞）; id<11  -->  (10,15] (范围查询，最基本的锁一般为next-key lock, 是前开后闭) 最后推出锁的范围是：[10,15]
+
+实际通过查询锁发现，有两个锁：
+行锁（记录锁）锁数据10  
+间隙锁 锁(10,15)
+
+具体锁的[10,15) 
+```
+
+### 范围查询2
+```text
+mysql> begin; select * from students where id > 10 and id <= 15 for update;
+```
+```text
+mysql>  select * from performance_schema.data_locks\G
+*************************** 2. row ***************************
+               ENGINE: INNODB
+       ENGINE_LOCK_ID: 281472482111488:4:4:5:281472493740112
+ENGINE_TRANSACTION_ID: 1880
+            THREAD_ID: 48
+             EVENT_ID: 90
+        OBJECT_SCHEMA: test
+          OBJECT_NAME: students
+       PARTITION_NAME: NULL
+    SUBPARTITION_NAME: NULL
+           INDEX_NAME: PRIMARY
+OBJECT_INSTANCE_BEGIN: 281472493740112
+            LOCK_TYPE: RECORD
+            LOCK_MODE: X
+          LOCK_STATUS: GRANTED
+            LOCK_DATA: 15
+2 rows in set (0.01 sec)
+```
+```text
+mysql> begin;update students set age = 1 where id =15;
+Query OK, 0 rows affected (0.00 sec)
+^C^C -- query aborted
+ERROR 1317 (70100): Query execution was interrupted
+
+mysql> begin;insert into students values(11,'m',30);
+Query OK, 0 rows affected (0.00 sec)
+^C^C -- query aborted
+ERROR 1317 (70100): Query execution was interrupted
+```
+这是一个next-key lock 锁住了（10，15]
+
+### 结论：
+```
+select * from performance_schema.data_locks;(/pərˈfɔːrməns/)查询看到
+LOCK_MODE = X 是前开后闭区间； next-key lock
+X,GAP 是前开后开区间（间隙锁）；
+X,REC_NOT_GAP 行锁。
+```
+
+```
+加锁时，会先给表添加意向锁，IX 或 IS；
+加锁是如果是多个范围，是分开加了多个锁，每个范围都有锁；（这个可以实践下 id < 20 的情况）
+主键等值查询，数据存在时，会对该主键索引的值加行锁 X,REC_NOT_GAP；
+主键等值查询，数据不存在时，会对查询条件主键值所在的间隙添加间隙锁 X,GAP；
+主键等值查询，范围查询时情况则比较复杂：
+    不同版本有不同的优化。上面用的是8.0.33 有记录锁+间隙锁的也有直接是next-key lock的
+```
+
+《MySql45讲》中总结过；
+### 两原则，两优化，一个bug
+> 原则1：加锁基本单位是next-key lock 范围是前开后闭
+> 
+> 原则2：查询过程中访问到的对象才会加锁
+> 
+> 优化1：索引上的等值查询，给唯一索引加锁时，next-key lock会退化为行锁
+> 
+> 优化2：索引上的等值查询，向右遍历时且最后一个值不满足等值条件，next-key lock会退化为间隙锁
+> 
+> 一个bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止
+> 
+> 但是bug在我测试的8.0.33已经被使用
