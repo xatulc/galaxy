@@ -60,10 +60,26 @@ docker ps
 # 查询全部的容器包括非运行
 docker ps -a
 ```
-### 3.3 进入容器
+### 3.3 exec命令
+exec 是 Docker 的一个子命令，用于在运行中的容器内部执行命令。
+
+#### 3.3.1 进入容器
 ```
 docker exec -it 容器名/容器id /bin/bash
 ```
+
+#### 3.3.2 执行容器内部其他命令
+##### 查看该容器内进程
+```shell
+# 查看该容器内进程
+docker exec 63df3b34d2b3 ps -ef
+```
+##### 查看该容器内操作系统信息
+```text
+docker exec 63df3b34d2b3 uname -a
+docker exec 63df3b34d2b3 uname -m
+```
+
 ### 3.4 容器文件拷贝
 #### 3.4.1 拷贝本地文件到容器内：
 ```
