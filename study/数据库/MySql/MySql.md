@@ -1,4 +1,4 @@
-主要对《MySql王者晋级之路》和 《JavaGuide》MySql模块对学习总结和自己的理解
+主要对《MySql王者晋级之路》和 《JavaGuide》MySql模块的学习总结和自己的理解
 
 ## Mysql主流版本和分支
 * Oracle官方的MySQL
