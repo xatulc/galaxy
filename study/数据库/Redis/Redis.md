@@ -48,7 +48,7 @@ Redis 默认使用了两个全局哈希表：哈希表 1 和哈希表 2。一开
 
 一共有5种基础的数据结构：
 
-![](images/基本数据结构.png ":size=300x300")
+![](images/redis-基本数据结构.png ":size=300x300")
 
 ### String字符串
 底层数据结构是：简单动态字符串。如果字符串长度小于1M时，扩容都是加倍现有空间；超过1M，每次扩容只加1M。最大长度是512M
@@ -103,7 +103,7 @@ quickList是一个ziplist组成的linkedlist双向链表，是 ziplist 和 linke
 
 ziplist是Redis节省内存而开发的数据结构。元素存储上一个entry的长度和当前entry的长度，通过长度推算下一个元素在什么地方。ziplist使用连续的内存块，以 O(1) 的时间复杂度在列表的两端进行 push 和 pop 操作。查找需要O(n)，是一种时间换空间的方案。
 
-![](images/ZipList.png ":size=300x300")
+![](images/reids-ZipList.png ":size=300x300")
 
 ### Hash 哈希 k-v
 哈希对象的编码可以是ziplist(压缩列表)或hashtable
