@@ -306,7 +306,7 @@ redo log buffer就是一块内存，用来先存redo日志的。 在执行事务
 2. redo log buffer占用的空间即将达到 innodb_log_buffer_size一半的时候，后台线程会主动写盘。
 3. 并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘
 
-## redo log
+## undo log
 在数据修改的时候，不仅记录了redo log，还记录undo log。如果因为某些原因导致事务失败或回滚了，可以用undo log进行回滚。
 
 undo log主要有两个作用：回滚和多版本控制(MVCC)
